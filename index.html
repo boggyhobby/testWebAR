@@ -2,15 +2,19 @@
 <!DOCTYPE html>
 <html lang="ja">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=devide-width", initial-scale=0.2/>
     <title>テスト：ModerlViewerを使ったWebARページ</title>
-  </head>
-  <body>
-  <script 
+    <script 
       type="module"
       src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
-
-  </script>
+    </script>
+    <script 
+      nomodule
+      src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
+    </script>
+  </head>
+  <body>
 
     <model-viewer  
     alt="MyMotoモデル"
@@ -19,12 +23,12 @@
     camera-controls
     interaction-prompt="auto"
 
-    style="width:1024px; height:768px;"
-
     background-color="greenyellow"
     shadow-intensity="1.0"
 
-    auto-rotate ar magic-leap>
+    auto-rotate
+    ar
+    magic-leap>
 
     </model-viewer>
   </body>
