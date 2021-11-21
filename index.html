@@ -3,43 +3,10 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=devide-width", initial-scale=1.0" />
-    <title>テスト：ModerlViewerを使ったWebARページ</title>
-    <script 
-      type="module"
-      src="https://unpkg.com/@google/model-viewer/dist/model-viewer.js">
-    </script>
-    <script 
-      nomodule
-      src="https://unpkg.com/@google/model-viewer/dist/model-viewer-legacy.js">
-    </script>
+    <title>テスト：WebARページ</title>
   </head>
   <body>
-
-    <h1><font size="7">my Moto</font></h1>
-    <p>
-      <font size="7">
-        画像の右下に
-        <img src="button.png" alt="ボタン" title="ボタン" width="24" height="24">
-        が表示された場合、押すとAR表示に切り替わります。
-      </font>
-    </p>
-    <model-viewer  
-    alt="MyMotoモデル"
-    src="my_moto.glb" 
-    ios-src="" 
-    camera-controls
-    interaction-prompt="auto"
-
-    style="width:2048px, height:1536px;"
-    background-color="greenyellow"
-    shadow-intensity="1.0"
-
-    auto-rotate
-    ar
-    magic-leap>
-
-    </model-viewer>
+    <a href= "./pages/modelViewer.html"><font size="7">model viewer</font></a>
     <a href= "./pages/locationAR.html"><font size="7">location AR</font></a>
   </body>
 </html>
