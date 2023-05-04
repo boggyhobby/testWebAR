@@ -30,27 +30,31 @@
       <a-sphere
         material="color: #f00"
         gps-entity-place="latitude: 35.346600; longitude: 139.5056767;"
-        scale="5 5 5"
+        scale="1 1 1"
       ></a-sphere>
       <a-box
-        material="color: #e10"
+        material="color: #870"
         gps-entity-place="latitude: 35.346915; longitude: 139.5061112;"
         scale="5 5 5"
       ></a-box>
       <a-box
-        material="color: #00f"
+        material="color: #087"
         gps-entity-place="latitude: 35.346489; longitude: 139.506190;"
         scale="5 5 5"
+        animation="property: position; from: 0 0 0; to: 0 10 0; loop: true; dur: 3000; easing: linear;"
       ></a-box>
+
       <a-text
         id="text"
         value="test test test"
         look-at="[gps-camera]"
         scale="15 15 15"
-        position="0 10 0"
+        position="0 0 10"
         gps-entity-place="latitude: 35.346615; longitude: 139.506540;"
       ></a-text>
+
       <a-camera gps-camera="gpsMinDistance:10; minDistance:5; maxDistance:50;" rotation-reader> </a-camera>
+
     </a-scene>
     <script>
       window.addEventListener('load', () => {
