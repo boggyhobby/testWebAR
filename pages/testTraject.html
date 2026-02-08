@@ -41,7 +41,7 @@
       <a-entity
         id="model"
         gltf-model="kamakura.glb"
-        scale="0.5 0.5 0.5"
+        scale="0.1 0.1 0.1"
         position="0 0 0"
         path-animation
       ></a-entity>
@@ -52,7 +52,7 @@
   </a-scene>
 
   <script>
-    /* ===== 軌跡アニメーション ===== */
+    <!-- /* ===== 軌跡アニメーション ===== */ -->
     AFRAME.registerComponent("path-animation", {
       schema: {
         duration: { type: "number", default: 5000 }
@@ -97,7 +97,7 @@
       }
     });
 
-    /* ===== マーカー検出で再生 ===== */
+    <!-- /* ===== マーカー検出で再生 ===== */ -->
     const marker = document.querySelector("#marker");
     const model = document.querySelector("#model");
 
