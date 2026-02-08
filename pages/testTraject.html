@@ -60,7 +60,7 @@
   </a-scene>
 
   <script>
-    /* ========= 軌跡アニメーション ========= */
+    <!-- /* ========= 軌跡アニメーション ========= */ -->
     AFRAME.registerComponent("path-animation", {
       schema: {
         duration: { type: "number", default: 4000 }
@@ -105,7 +105,7 @@
       }
     });
 
-    /* ========= Hit Test & タップ設置 ========= */
+    <!-- /* ========= Hit Test & タップ設置 ========= */  -->
     const scene = document.querySelector("a-scene");
     const reticle = document.querySelector("#reticle");
     const model = document.querySelector("#model");
@@ -126,7 +126,7 @@
       });
     });
 
-    /* ========= レティクル更新 ========= */
+    <!-- /* ========= レティクル更新 ========= */ -->
     AFRAME.registerComponent("reticle-hit-test", {
       tick: function () {
         const xrFrame = this.el.sceneEl.frame;
