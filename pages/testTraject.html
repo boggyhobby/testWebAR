@@ -26,7 +26,7 @@
 </head>
 
 <body>
-  <div id="hint">Hiroマーカーをカメラに映してください</div>
+  <div id="hint">Hiroマーカーをカメラに映してください.</div>
 
   <a-scene
     embedded
@@ -56,6 +56,7 @@
     AFRAME.registerComponent("path-animation", {
       schema: {
         duration: { type: "number", default: 5000 }
+        loop: { type: "boolean", default: false }
       },
 
       init: function () {
@@ -73,15 +74,24 @@
         this.startTime = null;
         this.isPlaying = true;
       },
+    
+      stop: function () {
+        this.isPlaying = false;
+      },
 
       tick: function (time) {
         if (!this.isPlaying) return;
         if (!this.startTime) this.startTime = time;
 
-        const t = (time - this.startTime) / this.data.duration;
+        let t = (time - this.startTime) / this.data.duration;
         if (t >= 1) {
-          this.isPlaying = false;
-          return;
+          if (this.data.loop) {
+            this.startTime = time;
+            t = 0;
+          } else {
+            this.isPlaying = false;
+            return;
+          }
         }
 
         const segments = this.path.length - 1;
@@ -104,6 +114,11 @@
     marker.addEventListener("markerFound", () => {
       model.components["path-animation"].start();
     });
+
+    marker.addEventListener("markerLost", () => {
+      model.components["path-animation"].stop();
+    });
+
   </script>
 </body>
 </html>
