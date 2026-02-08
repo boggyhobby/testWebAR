@@ -1,75 +1,159 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-  <meta charset="utf-8">
-  <title>A-Frame WebAR Path Animation</title>
-  <script src="https://aframe.io/releases/1.4.0/aframe.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/gh/AR-js-org/AR.js/aframe/build/aframe-ar.js"></script>
-  <script type="module" src="https://unpkg.com/@google/model-viewer@1.0.0/dist/model-viewer.min.js"></script>
+  <meta charset="utf-8" />
+  <title>One-file Markerless WebAR</title>
+
+  <!-- A-Frame -->
+  <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
+
+  <!-- aframe-extras（Hit Test補助） -->
+  <script src="https://cdn.jsdelivr.net/npm/aframe-extras@6.1.1/dist/aframe-extras.min.js"></script>
+
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #hint {
+      position: fixed;
+      bottom: 20px;
+      width: 100%;
+      text-align: center;
+      color: white;
+      font-size: 14px;
+      font-family: sans-serif;
+      text-shadow: 0 0 5px black;
+    }
+  </style>
 </head>
 
-<body style="margin:0; overflow:hidden;">
-  <model-viewer
-      src="kamakura.glb"
-      ios-src="kamakuraMac.usdz"
-      ar
-      camera-controls
-    >
-  </model-viewer>
+<body>
+  <div id="hint">床を映してタップするとモデルが出ます</div>
 
-<a-scene embedded arjs>
-  
-  <!-- マーカー -->
-  <a-marker preset="hiro">
+  <a-scene
+    webxr="requiredFeatures: hit-test;"
+    renderer="colorManagement: true;"
+    vr-mode-ui="enabled: false"
+  >
 
-    <!-- 動かすオブジェクト -->
-    <a-sphere id="mover" radius="0.03" color="red"></a-sphere>
+    <!-- ライト -->
+    <a-entity light="type: ambient; intensity: 1"></a-entity>
+    <a-entity light="type: directional; intensity: 0.8" position="1 2 1"></a-entity>
 
-  </a-marker>
+    <!-- レティクル -->
+    <a-entity
+      id="reticle"
+      geometry="primitive: ring; radiusInner: 0.04; radiusOuter: 0.05"
+      material="color: cyan; shader: flat"
+      rotation="-90 0 0"
+      visible="false"
+    ></a-entity>
 
-  <a-entity camera></a-entity>
-</a-scene>
+    <!-- GLB -->
+    <a-entity
+      id="model"
+      gltf-model="kamakura.glb"
+      scale="0.3 0.3 0.3"
+      visible="false"
+      path-animation
+    ></a-entity>
 
-<script>
-  <!-- // ① 事前に作った軌跡（メートル単位） -->
-  const path = [
-    {x: 0,   y: 0.02, z: 0},
-    {x: 0.1, y: 0.05, z: -0.1},
-    {x: 0.2, y: 0.1,  z: -0.2},
-    {x: 0.3, y: 0.05, z: -0.3},
-    {x: 0.4, y: 0.1,  z: -0.4},
-    {x: 0.5, y: 0.05, z: -0.5},
-    {x: 0.6, y: 0.1,  z: -0.6},
-    {x: 0.7, y: 0.05, z: -0.7},
-    {x: 0.8, y: 0.1,  z: -0.8},
-    {x: 0.9, y: 0.05, z: -0.9},
-    {x: 0.8, y: 0.1,  z: -0.8},
-    {x: 0.7, y: 0.05, z: -0.7},
-    {x: 0.6, y: 0.1,  z: -0.6},
-    {x: 0.5, y: 0.05, z: -0.5},
-    {x: 0.4, y: 0.1,  z: -0.4},
-    {x: 0.3, y: 0.05, z: -0.3},
-    {x: 0.2, y: 0.1,  z: -0.2},
-    {x: 0.1, y: 0.05, z: -0.1}
-  ];
+    <a-camera></a-camera>
+  </a-scene>
 
-  const mover = document.querySelector('#mover');
-  let index = 0;
+  <script>
+    /* ========= 軌跡アニメーション ========= */
+    AFRAME.registerComponent("path-animation", {
+      schema: {
+        duration: { type: "number", default: 4000 }
+      },
 
-  <!-- // ② アニメーション -->
-  function animatePath() {
-    mover.setAttribute('position', path[index]);
-    index++;
-    if (index < path.length) {
-      setTimeout(animatePath, 1000); // 速度調整
-    }
-  }
+      init: function () {
+        this.path = [
+          new THREE.Vector3(0, 0, 0),
+          new THREE.Vector3(0.3, 0, -0.2),
+          new THREE.Vector3(0.6, 0, -0.4),
+          new THREE.Vector3(0.3, 0, -0.6)
+        ];
+        this.startTime = null;
+        this.isPlaying = false;
+        this.origin = new THREE.Vector3();
+      },
 
-  <!-- // マーカー検出後に開始 -->
-  document.querySelector('a-marker').addEventListener('markerFound', () => {
-    index = 0;
-    animatePath();
-  });
-</script>
+      start: function () {
+        this.startTime = null;
+        this.isPlaying = true;
+        this.origin.copy(this.el.object3D.position);
+      },
+
+      tick: function (time) {
+        if (!this.isPlaying) return;
+        if (!this.startTime) this.startTime = time;
+
+        const t = Math.min((time - this.startTime) / this.data.duration, 1);
+        const segments = this.path.length - 1;
+        const p = t * segments;
+
+        const i = Math.floor(p);
+        const lt = p - i;
+
+        const from = this.path[i];
+        const to = this.path[i + 1] || from;
+
+        const offset = new THREE.Vector3().lerpVectors(from, to, lt);
+        this.el.object3D.position.copy(this.origin.clone().add(offset));
+
+        if (t >= 1) this.isPlaying = false;
+      }
+    });
+
+    /* ========= Hit Test & タップ設置 ========= */
+    const scene = document.querySelector("a-scene");
+    const reticle = document.querySelector("#reticle");
+    const model = document.querySelector("#model");
+
+    scene.addEventListener("loaded", () => {
+      scene.renderer.xr.addEventListener("sessionstart", () => {
+        const session = scene.renderer.xr.getSession();
+
+        session.addEventListener("select", () => {
+          if (!reticle.visible) return;
+
+          model.object3D.position.copy(reticle.object3D.position);
+          model.object3D.quaternion.copy(reticle.object3D.quaternion);
+          model.setAttribute("visible", true);
+
+          model.components["path-animation"].start();
+        });
+      });
+    });
+
+    /* ========= レティクル更新 ========= */
+    AFRAME.registerComponent("reticle-hit-test", {
+      tick: function () {
+        const xrFrame = this.el.sceneEl.frame;
+        if (!xrFrame) return;
+
+        const hitTestSource = this.el.sceneEl.hitTestSource;
+        const referenceSpace = this.el.sceneEl.referenceSpace;
+
+        if (!hitTestSource || !referenceSpace) return;
+
+        const hitTestResults = xrFrame.getHitTestResults(hitTestSource);
+        if (hitTestResults.length > 0) {
+          const pose = hitTestResults[0].getPose(referenceSpace);
+          reticle.object3D.visible = true;
+          reticle.object3D.matrix.fromArray(pose.transform.matrix);
+          reticle.object3D.matrix.decompose(
+            reticle.object3D.position,
+            reticle.object3D.quaternion,
+            reticle.object3D.scale
+          );
+        } else {
+          reticle.object3D.visible = false;
+        }
+      }
+    });
+
+    reticle.setAttribute("reticle-hit-test", "");
+  </script>
 </body>
 </html>
